@@ -198,6 +198,16 @@ def img_from_url(url: str):
     img = rgb_transform.postprocess(img_pil).unsqueeze(0)
     return img
 
+def img_from_local(path: str):
+    rgb_transform = RGBTransform(imagenet_default_mean_and_std=True)
+    # img_data = requests.get(url).content
+    # with open('demo.png', 'wb') as handler:
+    #     handler.write(img_data)
+    img_pil = rgb_transform.load(path)
+    img_pil = rgb_transform.preprocess(img_pil)
+    img_pil = center_crop(img_pil, (min(img_pil.size), min(img_pil.size))).resize((224,224))
+    img = rgb_transform.postprocess(img_pil).unsqueeze(0)
+    return img
 
 class Demo4MSampler(nn.Module):
     """Convenience wrapper for easy 4M loading and generation. Users can specify HuggingFace Hub 
@@ -251,6 +261,12 @@ class Demo4MSampler(nn.Module):
         self.sampler_fm = GenerationSampler(fm)
         self.mods = mods or list(set(fm.encoder_modalities) | set(fm.decoder_modalities))
 
+        print("##### mods:")
+        # print(f"**** demo_4M_sampler.py: {set(fm.encoder_modalities)=}")  # DH
+        # print(f"**** demo_4M_sampler.py: {set(fm.decoder_modalities)=}")  # DH
+        print(f"**** demo_4M_sampler.py: {self.mods=}")  # DH
+        print("")
+
         # Load optional 4M super-res model and initialize sampler
         if fm_sr is not None:
             fm_sr = load_model(fm_sr, FM)
@@ -258,6 +274,11 @@ class Demo4MSampler(nn.Module):
             self.mods_sr = mods_sr or list(set(fm_sr.encoder_modalities) | set(fm_sr.decoder_modalities))
         else:
             self.sampler_fm_sr = None
+
+        print("##### mods_sr:")
+        # print(f"**** demo_4M_sampler.py: {self.sampler_fm_sr=}")  # DH
+        print(f"**** demo_4M_sampler.py: {self.mods_sr=}")  # DH
+        print("")
 
         # Load tokenizers
         self.toks = {}
