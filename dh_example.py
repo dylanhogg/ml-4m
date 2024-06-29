@@ -11,11 +11,11 @@ LOCAL_IMG = './_images/image2.jpg'
 PYTORCH_ENABLE_MPS_FALLBACK = os.getenv('PYTORCH_ENABLE_MPS_FALLBACK', None)
 DEVICE = "mps"
 MODEL = "EPFL-VILAB/4M-7_B_CC12M"  # 445M params, F32 type, 8,725 downloads
-# MODEL = "EPFL-VILAB//4M-21_XL"  # 4.54B params, F32 type, 484 downloads (default demo model)
+# MODEL = "EPFL-VILAB/4M-21_XL"  # 4.54B params, F32 type, 484 downloads (default demo model)
 
 # MODS = None  # Default: ['det', 'tok_rgb@224', 'rgb@224', 'tok_semseg@224', 'tok_normal@224', 'tok_clip@224', 'caption', 'tok_depth@224']
 # MODS_SR = None  # Default: ['det', 'tok_semseg@448', 'rgb@224', 'tok_normal@448', 'tok_clip@224', 'rgb@448', 'caption', 'tok_depth@448', 'tok_rgb@224', 'tok_semseg@224', 'tok_clip@448', 'tok_rgb@448', 'tok_normal@224', 'tok_depth@224']
-MODS = ['caption', 'tok_semseg@224', 'tok_clip@224']
+MODS = ['caption']  # , 'tok_semseg@224', 'tok_clip@224']
 MODS_SR = ['caption']
 
 # ----------------------------
@@ -40,10 +40,12 @@ save_path = LOCAL_IMG.replace('.jpg', f'_output_{run_id}.jpg')
 
 start = datetime.now()
 
-sampler = Demo4MSampler(fm=MODEL, mods=MODS, mods_sr=MODS_SR).to(device=DEVICE)
-preds = sampler({'rgb@224': img.to(device=DEVICE)}, seed=None) 
+sampler = Demo4MSampler(fm=MODEL, mods=MODS, mods_sr=MODS_SR).to(device=DEVICE)  # TODO: set dtype also?
+preds = sampler({'rgb@224': img.to(device=DEVICE)}, seed=None)
 
 took = datetime.now() - start
 print(f"took {took.total_seconds()}s on {DEVICE=}")
 
 sampler.plot_modalities(preds, save_path=save_path)
+
+print(f"Finished {run_id=}. Output saved to {save_path=}")

@@ -1,3 +1,6 @@
+_images/
+demo.png
+
 *.swp
 **/__pycache__/**
 .dumbo.json
