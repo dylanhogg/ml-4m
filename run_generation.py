@@ -31,7 +31,8 @@ import torchvision.transforms.functional as TF
 # Metrics 
 from torchmetrics.image.fid import FrechetInceptionDistance
 from torchmetrics.image.inception import InceptionScore
-from torchmetrics.multimodal import CLIPScore
+# from torchmetrics.multimodal import CLIPScore
+from torchmetrics.multimodal.clip_score import CLIPScore
 
 # Tokenizers (text & image modalities)
 from tokenizers import Tokenizer
@@ -337,6 +338,8 @@ def repeat_if_necessary(lst, n):
         return lst * n if len(lst) == 1 else lst        
 
 def load_model(model_id, model_class, device):
+    assert model_id, f"load_model: model_id is empty {model_id=}"
+    print(f"load_model {model_id=}")
     if model_id is None:
         model = None
     elif model_id.endswith('.safetensors'):
@@ -345,6 +348,7 @@ def load_model(model_id, model_class, device):
         model.load_state_dict(ckpt)
     else:
         model = model_class.from_pretrained(model_id)
+    print(f"load_model {model=}")
     return model.eval().to(device)
 
 def load_tokenizers(args, device):
@@ -492,7 +496,9 @@ def main(args):
     args = copy.deepcopy(args)
     utils.init_distributed_mode(args)
 
+    print(f"{args.device=}")
     device = torch.device(args.device)
+    print(f"{device=}")
 
     # Fix the seed for reproducibility
     args.seed = args.seed + utils.get_rank()
@@ -568,6 +574,7 @@ def main(args):
 
     # Load model & define sampler
     model = load_model(args.model, FM, device)
+    assert model, f"Model was not loaded {model=}"
     gen_sampler= GenerationSampler(model)
 
     # Load super-resolution model if so specified

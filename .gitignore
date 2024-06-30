@@ -1,5 +1,7 @@
 _images/
 demo.png
+venv/
+env/
 
 *.swp
 **/__pycache__/**
